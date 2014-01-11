@@ -56,7 +56,7 @@ ISR(TIMER2_OVF_vect) {
   if (showTime) {
     leds[ledMap[secs]] = CRGB::Black;
     leds[ledMap[mins]] = CRGB::Black;
-    leds[ledMap[(hrs % 12) * 5]] = CRGB::Black;
+    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = CRGB::Black;
   }
 
   incSecs();
@@ -64,7 +64,7 @@ ISR(TIMER2_OVF_vect) {
   if (showTime) {
     leds[ledMap[secs]] += CRGB::Blue;
     leds[ledMap[mins]] += CRGB::Green;
-    leds[ledMap[(hrs % 12) * 5]] += CRGB::Red;
+    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += CRGB::Red;
     LEDS.show();
   }
   
@@ -137,7 +137,7 @@ void loop() {
         if (showTime) {
           leds[ledMap[secs]] = CRGB::Black;
           leds[ledMap[mins]] = CRGB::Black;
-          leds[ledMap[(hrs % 12) * 5]] = CRGB::Black;
+          leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = CRGB::Black;
         }
 
         if (type == ON)
@@ -148,7 +148,7 @@ void loop() {
         if (showTime) {
           leds[ledMap[secs]] += CRGB::Blue;
           leds[ledMap[mins]] += CRGB::Green;
-          leds[ledMap[(hrs % 12) * 5]] += CRGB::Red;
+          leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += CRGB::Red;
           LEDS.show();
         }
 
