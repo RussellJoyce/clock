@@ -100,10 +100,6 @@ void loop() {
         msg[2] == 0xF &&
         msg[3] == 0x2) {
 
-#if (DEBUG)
-      Serial.print("Registering new remote...\n");
-#endif 
-
       remoteId[0] = msg[4];
       remoteId[1] = msg[5];
       remoteId[2] = msg[6];
@@ -118,21 +114,17 @@ void loop() {
       animation(ANIM_SPIN);
     }
 
-    // Check remote ID matches
-    else if (remoteId[0] == msg[4] &&
-             remoteId[1] == msg[5] &&
-             remoteId[2] == msg[6] &&
-             remoteId[3] == msg[7] &&
-             remoteId[4] == msg[8] &&
-             remoteId[5] == msg[9]) {
+    // Check remote ID matches and cull repeats
+    else if (!ignoreKey()) {
 
       int btn = msg[2];
       int type = msg[3];
+      int pressType = msg[0];
 
       if (btn == 0) {
         go = (type == ON);
       }
-      else if (btn == 1) {
+      else if (btn == 1 && pressType != UP) {
 
         if (showTime) {
           leds[ledMap[secs]] = CRGB::Black;
@@ -164,8 +156,33 @@ void loop() {
         else if (type == OFF)
           animation(ANIM_RAINBOW);
       }
+
+      // Store last button registered
+      lastButton[0] = msg[0];
+      lastButton[1] = msg[1];
+      lastButton[2] = msg[2];
+      lastButton[3] = msg[3];
+      lastButtonTime = millis();
     }
   }
+}
+
+boolean ignoreKey() {
+  // Ignore if not a hold and equal to last button press within repeat delay
+
+  return ((remoteId[0] != msg[4] ||
+           remoteId[1] != msg[5] ||
+           remoteId[2] != msg[6] ||
+           remoteId[3] != msg[7] ||
+           remoteId[4] != msg[8] ||
+           remoteId[5] != msg[9]) ||
+          (msg[0] != HOLDON &&
+           msg[0] != HOLDOFF &&
+           lastButton[0] == msg[0] &&
+           lastButton[1] == msg[1] &&
+           lastButton[2] == msg[2] &&
+           lastButton[3] == msg[3] &&
+           (millis() - lastButtonTime) < KEYDELAY));
 }
 
 void initLEDs(byte brightness) {
@@ -174,7 +191,9 @@ void initLEDs(byte brightness) {
 }
 
 void intro() {
+#if (!DEBUG)
   animation(ANIM_RAINBOW);
+#endif
 }
 
 void incSecs() {

@@ -27,7 +27,14 @@
 #define ALLOFF  0xC
 #define MOOD    0x8
 
+#define KEYDELAY 550
+
 uint8_t remoteId[6];
+uint8_t lastButton[4];
+long lastButtonTime;
+
+byte msg[10];
+byte len = 10;
 
 
 // Animation types
@@ -48,12 +55,11 @@ int secs = 0;
 int mins = 0;
 int hrs = 0;
 
+
 boolean go = false;
 boolean showTime = false;
 boolean timeSet = false;
 boolean animating = false;
 
-byte msg[10];
-byte len = 10;
 
 uint8_t maxBrightness = 32;
