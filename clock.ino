@@ -48,8 +48,10 @@ ISR(TIMER2_OVF_vect) {
     return;
 
   if (!timeSet) {
-    if (!animating && !turnedOff)
+    if (!animating && !turnedOff && !settingChanged)
       animation(ANIM_PULSER);
+    else if (settingChanged)
+      settingChanged = false;
     return;
   }
 
@@ -65,12 +67,19 @@ ISR(TIMER2_OVF_vect) {
   incTime();
 
   if (!animating || animatingOff) {
+    // Add markers every 5 ticks
+    for (int i = 5; i < NUM_LEDS; i+=5) {
+      leds[ledMap[i]] = LED_5;
+    }
+
     leds[ledMap[secs]] += CRGB::Blue;
     leds[ledMap[mins]] += CRGB::Green;
     leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += CRGB::Red;
 
-    if (showTime && !turnedOff)
+    if (showTime && !turnedOff && !settingChanged)
       LEDS.show();
+    else if (settingChanged)
+      settingChanged = false;
   }
   
 #if (DEBUG)
@@ -89,6 +98,7 @@ ISR(TIMER2_OVF_vect) {
   Serial.print(secs);
   Serial.print("\n");
 #endif
+
 }
 
 
@@ -157,9 +167,40 @@ void loop() {
       }
       */
 
+      // Set tick style
+      if (btn == BTN_TICK && pressType == DOWN) {
+        // On first press, just show current value
+        if (lastButton[2] == BTN_TICK && ((millis() - lastButtonTime) < 2000)) {
+          if (type == OFF && tickStyle > 0) {
+            // Decrease tick style value
+            tickStyle--;
+          }
+          else if (type == ON && tickStyle < (NUM_TICK - 1)) {
+            // Increase tick style value
+            tickStyle++;
+          }
+        }
+        displaySettingValue(tickStyle);
+      }
+
+      // Set clock style
+      if (btn == BTN_CLK && pressType == DOWN) {
+        // On first press, just show current value
+        if (lastButton[2] == BTN_CLK && ((millis() - lastButtonTime) < 2000)) {
+          if (type == OFF && clockStyle > 0) {
+            // Decrease tick style value
+            clockStyle--;
+          }
+          else if (type == ON && clockStyle < (NUM_CLK - 1)) {
+            // Increase tick style value
+            clockStyle++;
+          }
+        }
+        displaySettingValue(clockStyle);
+      }
 
       // Set seconds/minutes/hours
-      if ((btn == BTN_HRS || btn == BTN_MINS || btn == BTN_SECS) && pressType != UP) {
+      else if ((btn == BTN_HRS || btn == BTN_MINS || btn == BTN_SECS) && pressType != UP) {
         boolean showedTime = showTime;
         boolean going = go;
         showTime = false;
@@ -239,7 +280,7 @@ void loop() {
       }
 
       // Set AM/PM
-      else if (btn == 15 && pressType == DOWN) {
+      else if (btn == BTN_AMPM && pressType == DOWN) {
         if (type == OFF) {
           // Set to AM
           if (hrs > 11)
@@ -515,5 +556,32 @@ void turnOn() {
 
   animating = false;
   animatingOff = false;
+}
+
+void displaySettingValue(int value) {
+  // Save state
+  animating = true;
+  boolean showedTime = showTime;
+  uint8_t brightness = LEDS.getBrightness();
+  //memcpy(ledsBackup, leds, NUM_LEDS * sizeof(CRGB));
+
+  // Clear LEDs and stop time display
+  showTime = false;
+
+  memset(leds, 0, sizeof(leds));
+
+  for (int i = 0; i <= value; i++) {
+    leds[ledMap[i]] = CRGB::White;
+  }
+
+  LEDS.show();
+
+  settingChanged = true;
+
+  // Restore state
+  //memcpy(leds, ledsBackup, NUM_LEDS * sizeof(CRGB));
+  LEDS.setBrightness(brightness);
+  showTime = showedTime;
+  animating = false;
 }
 

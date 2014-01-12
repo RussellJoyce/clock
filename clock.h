@@ -14,9 +14,13 @@
 
 
 // Button functions
+#define BTN_TICK 2
+#define BTN_CLK  3
+
 #define BTN_HRS  12
 #define BTN_MINS 13
 #define BTN_SECS 14
+#define BTN_AMPM 15
 
 
 /**
@@ -71,6 +75,30 @@ int secs = 0;
 int mins = 0;
 int hrs = 0;
 
+// User settings
+int handBrightness;
+int handColours;
+int tickStyle;
+int clockStyle;
+int markerBrightness;
+int markerColours;
+int markerType;
+int powerMode;
+
+
+#define NUM_TICK 5
+#define NUM_CLK 3
+
+
+CRGB secondHand;
+CRGB minuteHand;
+CRGB hourHand;
+CRGB marker5;
+CRGB marker15;
+CRGB marker30;
+CRGB marker60;
+
+
 
 boolean go = false;
 boolean showTime = false;
@@ -78,6 +106,7 @@ boolean timeSet = false;
 boolean animating = false;
 boolean animatingOff = false;
 boolean timeChanged = false;
+boolean settingChanged = false;
 boolean turnedOff = false;
 
 
