@@ -155,28 +155,24 @@ void loop() {
       int type = msg[3];
       int pressType = msg[0];
 
-      /*
-      if (btn == 0) {
-        go = (type == ON);
+      // Set hand brightness
+      if (btn == BTN_HBRIGHT && pressType == DOWN) {
+
       }
-      else if (btn == 2) {
-        if (type == ON)
-          animation(ANIM_SPIN);
-        else if (type == OFF)
-          animation(ANIM_RAINBOW);
+
+      // Set hand colour
+      else if (btn == BTN_HCOLOUR && pressType == DOWN) {
+
       }
-      */
 
       // Set tick style
-      if (btn == BTN_TICK && pressType == DOWN) {
-        // On first press, just show current value
+      else if (btn == BTN_TICK && pressType == DOWN) {
+        // On first press, just show current value, otherwise increment/decrement
         if (lastButton[2] == BTN_TICK && ((millis() - lastButtonTime) < 2000)) {
           if (type == OFF && tickStyle > 0) {
-            // Decrease tick style value
             tickStyle--;
           }
           else if (type == ON && tickStyle < (NUM_TICK - 1)) {
-            // Increase tick style value
             tickStyle++;
           }
         }
@@ -184,19 +180,70 @@ void loop() {
       }
 
       // Set clock style
-      if (btn == BTN_CLK && pressType == DOWN) {
-        // On first press, just show current value
+      else if (btn == BTN_CLK && pressType == DOWN) {
+        // On first press, just show current value, otherwise increment/decrement
         if (lastButton[2] == BTN_CLK && ((millis() - lastButtonTime) < 2000)) {
           if (type == OFF && clockStyle > 0) {
-            // Decrease tick style value
             clockStyle--;
           }
           else if (type == ON && clockStyle < (NUM_CLK - 1)) {
-            // Increase tick style value
             clockStyle++;
           }
         }
         displaySettingValue(clockStyle);
+      }
+
+      // Set marker brightness
+      else if (btn == BTN_MBRIGHT && pressType == DOWN) {
+
+      }
+
+      // Set marker colour
+      else if (btn == BTN_MCOLOUR && pressType == DOWN) {
+
+      }
+
+      // Set marker type
+      else if (btn == BTN_MTYPE && pressType == DOWN) {
+        // On first press, just show current value, otherwise increment/decrement
+        if (lastButton[2] == BTN_MTYPE && ((millis() - lastButtonTime) < 2000)) {
+          if (type == OFF && markerType > 0) {
+            markerType--;
+          }
+          else if (type == ON && markerType < (NUM_MRKR - 1)) {
+            markerType++;
+          }
+        }
+        displaySettingValue(markerType);
+      }
+
+      // Rotate clock
+      else if (btn == BTN_ROTATE && pressType == DOWN) {
+
+      }
+
+      // Set power type
+      else if (btn == BTN_POWER && pressType == DOWN) {
+        // On first press, just show current value, otherwise increment/decrement
+        if (lastButton[2] == BTN_POWER && ((millis() - lastButtonTime) < 2000)) {
+          if (type == OFF && powerMode > 0) {
+            powerMode--;
+          }
+          else if (type == ON && powerMode < (NUM_PWR - 1)) {
+            powerMode++;
+          }
+        }
+        displaySettingValue(powerMode);
+      }
+
+      // Rotate clock
+      else if (btn == BTN_ROTATE && pressType == DOWN) {
+
+      }
+
+      // Go crazy
+      else if (btn == BTN_CRAZY && pressType == DOWN) {
+        animation(ANIM_RAINBOW);
       }
 
       // Set seconds/minutes/hours

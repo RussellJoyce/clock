@@ -14,13 +14,25 @@
 
 
 // Button functions
-#define BTN_TICK 2
-#define BTN_CLK  3
+#define BTN_HBRIGHT 0
+#define BTN_HCOLOUR 1
+#define BTN_TICK    2
+#define BTN_CLK     3
 
-#define BTN_HRS  12
-#define BTN_MINS 13
-#define BTN_SECS 14
-#define BTN_AMPM 15
+#define BTN_MBRIGHT 4
+#define BTN_MCOLOUR 5
+#define BTN_MTYPE   6
+//#define BTN_      7
+
+#define BTN_ROTATE  8
+//#define BTN_      9
+#define BTN_POWER   10
+#define BTN_CRAZY   11
+
+#define BTN_HRS     12
+#define BTN_MINS    13
+#define BTN_SECS    14
+#define BTN_AMPM    15
 
 
 /**
@@ -64,9 +76,12 @@ byte len = 10;
 
 
 // Standard LED map
-uint8_t ledMap[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59};
+//uint8_t ledMap[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59};
 // Backwards LED map
 //uint8_t ledMap[] = {59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+// Upside-down LED map
+uint8_t ledMap[] = {30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
+
 
 
 CRGB leds[NUM_LEDS];
@@ -75,19 +90,43 @@ int secs = 0;
 int mins = 0;
 int hrs = 0;
 
+
 // User settings
+
+#define NUM_TICK      5
+#define TICK_STANDARD 0
+#define TICK_SMOOTH   1
+#define TICK_PULSE    2
+#define TICK_SPIN     3
+#define TICK_FILL     4
+
+#define NUM_CLK       4
+#define CLK_STANDARD  0
+#define CLK_24HR      1
+#define CLK_AUDSLEY   2
+#define CLK_MOVEFACE  3
+
+#define NUM_MRKR      5
+#define MRKR_EVERY5   0
+#define MRKR_EVERY15  1
+#define MRKR_EVERY30  2
+#define MRKR_60ONLY   3
+#define MRKR_NONE     4
+
+#define NUM_PWR       2
+#define PWR_STANDARD  0
+#define PWR_HIGH      1
+
+
 int handBrightness;
 int handColours;
-int tickStyle;
-int clockStyle;
+int tickStyle = TICK_STANDARD;
+int clockStyle = CLK_STANDARD;
 int markerBrightness;
 int markerColours;
-int markerType;
-int powerMode;
-
-
-#define NUM_TICK 5
-#define NUM_CLK 3
+int markerType = MRKR_EVERY5;
+int clockAngle = 0;
+int powerMode = PWR_STANDARD;
 
 
 CRGB secondHand;
