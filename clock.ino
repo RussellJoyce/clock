@@ -48,7 +48,7 @@ ISR(TIMER2_OVF_vect) {
     return;
 
   if (!timeSet) {
-    if (!animating)
+    if (!animating && !turnedOff)
       animation(ANIM_PULSER);
     return;
   }
@@ -59,22 +59,18 @@ ISR(TIMER2_OVF_vect) {
   }
 
 
-  if (showTime) {
-    //leds[ledMap[secs]] = CRGB::Black;
-    //leds[ledMap[mins]] = CRGB::Black;
-    //leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = CRGB::Black;
-
-    // Clear LEDs array
+  if (!animating || animatingOff)
     memset(leds, 0, sizeof(leds));
-  }
 
   incTime();
 
-  if (showTime) {
+  if (!animating || animatingOff) {
     leds[ledMap[secs]] += CRGB::Blue;
     leds[ledMap[mins]] += CRGB::Green;
     leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += CRGB::Red;
-    LEDS.show();
+
+    if (showTime && !turnedOff)
+      LEDS.show();
   }
   
 #if (DEBUG)
@@ -97,6 +93,8 @@ ISR(TIMER2_OVF_vect) {
 
 
 void loop() {
+
+  // Check for outstanding LightwaveRF message
   if (lwrx_message()) {
     lwrx_getmessage(msg,&len);
 #if (DEBUG)
@@ -123,6 +121,23 @@ void loop() {
       animation(ANIM_SPIN);
     }
 
+    // Check for 'all off' - toggle power
+    else if (msg[0] == 0xC &&
+             msg[1] == 0x0 &&
+             msg[2] == 0xF &&
+             msg[3] == 0x0) {
+
+      // Do nothing if key repeat
+      if ((millis() - lastOffButtonTime) > OFFDELAY) {
+        if (turnedOff)
+          turnOn();
+        else
+          turnOff();
+      }
+
+      lastOffButtonTime = millis();
+    }
+
     // Check remote ID matches and cull repeats
     else if (!ignoreKey()) {
 
@@ -141,6 +156,7 @@ void loop() {
           animation(ANIM_RAINBOW);
       }
       */
+
 
       // Set seconds/minutes/hours
       if ((btn == BTN_HRS || btn == BTN_MINS || btn == BTN_SECS) && pressType != UP) {
@@ -255,8 +271,9 @@ void loop() {
 
 
 boolean ignoreKey() {
-  // Ignore if not a hold and equal to last button press within repeat delay
-  return ((remoteId[0] != msg[4] ||
+  // Ignore if turned off, wrong remote, or not a hold and equal to last button press within repeat delay
+  return (turnedOff ||
+          (remoteId[0] != msg[4] ||
            remoteId[1] != msg[5] ||
            remoteId[2] != msg[6] ||
            remoteId[3] != msg[7] ||
@@ -463,5 +480,40 @@ void animation(int type) {
   LEDS.clear();
   showTime = showedTime;
   animating = false;
+}
+
+void turnOff() {
+  animating = true;
+  animatingOff = true;
+  currentBrightness = LEDS.getBrightness();
+  int dly = 2048 / currentBrightness;
+  
+  for (int i = currentBrightness; i >= 0; i--) {
+    LEDS.setBrightness(i);
+    LEDS.show();
+    delay(dly);
+  }
+
+  turnedOff = true;
+
+  animating = false;
+  animatingOff = false;
+}
+
+void turnOn() {
+  animating = true;
+  animatingOff = true;
+  int dly = 2048 / currentBrightness;
+
+  turnedOff = false;
+  
+  for (int i = 0; i <= currentBrightness; i++) {
+    LEDS.setBrightness(i);
+    LEDS.show();
+    delay(dly);
+  }
+
+  animating = false;
+  animatingOff = false;
 }
 

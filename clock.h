@@ -40,10 +40,12 @@
 #define MOOD    0x8
 
 #define KEYDELAY 550
+#define OFFDELAY 500
 
 uint8_t remoteId[6];
 uint8_t lastButton[4];
 long lastButtonTime;
+long lastOffButtonTime;
 
 byte msg[10];
 byte len = 10;
@@ -74,7 +76,10 @@ boolean go = false;
 boolean showTime = false;
 boolean timeSet = false;
 boolean animating = false;
+boolean animatingOff = false;
 boolean timeChanged = false;
+boolean turnedOff = false;
 
 
 uint8_t maxBrightness = 32;
+uint8_t currentBrightness = 32;
