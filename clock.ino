@@ -7,7 +7,7 @@
 void setup() {
   // initialize serial debug
 #if (DEBUG)
-  Serial.begin(9600);
+  Serial.begin(19200);
 #endif
 
   // Load remote ID from EEPROM
@@ -72,13 +72,9 @@ ISR(TIMER2_OVF_vect) {
       leds[ledMap[i]] = LED_5;
     }
 
-    leds[ledMap[secs]] += CRGB::Blue;
-    leds[ledMap[mins]] += CRGB::Green;
-    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += CRGB::Red;
+    tickAnimation();
 
-    if (showTime && !turnedOff && !settingChanged)
-      LEDS.show();
-    else if (settingChanged)
+    if (settingChanged)
       settingChanged = false;
   }
   
@@ -630,5 +626,46 @@ void displaySettingValue(int value) {
   LEDS.setBrightness(brightness);
   showTime = showedTime;
   animating = false;
+}
+
+void tickAnimation() {
+  // Basic ticking
+  if (tickStyle == TICK_STANDARD) {
+    leds[ledMap[secs]] += secColour;
+    leds[ledMap[mins]] += minColour;
+    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += hrColour;
+  }
+
+  // Smooth fading tick
+  else if (tickStyle == TICK_SMOOTH) {
+
+  }
+
+  // Pulse each tick
+  else if (tickStyle == TICK_PULSE) {
+    
+  }
+
+  // Spin after each tick
+  else if (tickStyle == TICK_SPIN) {
+    
+  }
+
+  // Fill up to current seconds
+  else if (tickStyle == TICK_FILL) {
+    if (mins % 2 == 1) {
+      for (int i = secs; i < NUM_LEDS; i++)
+        leds[ledMap[i]] += secColour;
+    }
+    else {
+      for (int i = 0; i <= secs; i++)
+        leds[ledMap[i]] += secColour;
+    }
+    leds[ledMap[mins]] = minColour;
+    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = hrColour;
+  }
+
+  if (showTime && !turnedOff && !settingChanged)
+      LEDS.show();
 }
 
