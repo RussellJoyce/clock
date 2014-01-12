@@ -3,6 +3,7 @@
 #include <EEPROM.h>
 #include "clock.h"
 
+
 void setup() {
   // initialize serial debug
 #if (DEBUG)
@@ -52,14 +53,22 @@ ISR(TIMER2_OVF_vect) {
     return;
   }
 
-
-  if (showTime) {
-    leds[ledMap[secs]] = CRGB::Black;
-    leds[ledMap[mins]] = CRGB::Black;
-    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = CRGB::Black;
+  if (timeChanged) {
+    timeChanged = false;
+    return;
   }
 
-  incSecs();
+
+  if (showTime) {
+    //leds[ledMap[secs]] = CRGB::Black;
+    //leds[ledMap[mins]] = CRGB::Black;
+    //leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = CRGB::Black;
+
+    // Clear LEDs array
+    memset(leds, 0, sizeof(leds));
+  }
+
+  incTime();
 
   if (showTime) {
     leds[ledMap[secs]] += CRGB::Blue;
@@ -68,7 +77,7 @@ ISR(TIMER2_OVF_vect) {
     LEDS.show();
   }
   
-#if (DEGUG)
+#if (DEBUG)
   // Print time
   if (hrs < 10) Serial.print("0");
   Serial.print(hrs);
@@ -121,40 +130,117 @@ void loop() {
       int type = msg[3];
       int pressType = msg[0];
 
+      /*
       if (btn == 0) {
         go = (type == ON);
-      }
-      else if (btn == 1 && pressType != UP) {
-
-        if (showTime) {
-          leds[ledMap[secs]] = CRGB::Black;
-          leds[ledMap[mins]] = CRGB::Black;
-          leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = CRGB::Black;
-        }
-
-        if (type == ON)
-          incSecs();
-        else
-          decSecs();
-
-        if (showTime) {
-          leds[ledMap[secs]] += CRGB::Blue;
-          leds[ledMap[mins]] += CRGB::Green;
-          leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += CRGB::Red;
-          LEDS.show();
-        }
-
-        if (!timeSet) {
-          timeSet = true;
-          showTime = true;
-        }
-
       }
       else if (btn == 2) {
         if (type == ON)
           animation(ANIM_SPIN);
         else if (type == OFF)
           animation(ANIM_RAINBOW);
+      }
+      */
+
+      // Set seconds/minutes/hours
+      if ((btn == BTN_HRS || btn == BTN_MINS || btn == BTN_SECS) && pressType != UP) {
+        boolean showedTime = showTime;
+        boolean going = go;
+        showTime = false;
+        go = false;
+
+        // Clear LEDs array
+        memset(leds, 0, sizeof(leds));
+
+        // Add markers every 5 ticks
+        for (int i = 5; i < NUM_LEDS; i+=5) {
+          leds[ledMap[i]] = LED_5;
+        }
+        leds[ledMap[0]]  = LED_60;
+        leds[ledMap[15]] = LED_15;
+        leds[ledMap[30]] = LED_15;
+        leds[ledMap[45]] = LED_15;
+
+        
+        // Increment/decrement value and display on clock
+        if (type == ON) {
+          if (btn == BTN_SECS) {
+            secs++;
+            if (secs == 60)
+              secs = 0;
+            leds[ledMap[secs]] = CRGB::White;
+          }
+          else if (btn == BTN_MINS) {
+            mins++;
+            if (mins == 60)
+              mins = 0;
+            leds[ledMap[mins]] = CRGB::White;
+          }
+          else if (btn == BTN_HRS) {
+            hrs++;
+            if (hrs == 12)
+              hrs = 0;
+            else if (hrs == 24)
+              hrs = 12;
+            leds[ledMap[(hrs % 12) * 5]] = CRGB::White;
+          }
+        }
+        else if (type == OFF) {
+          if (btn == BTN_SECS) {
+            secs--;
+            if (secs == -1)
+              secs = 59;
+            leds[ledMap[secs]] = CRGB::White;
+          }
+          else if (btn == BTN_MINS) {
+            mins--;
+            if (mins == -1)
+              mins = 59;
+            leds[ledMap[mins]] = CRGB::White;
+          }
+          else if (btn == BTN_HRS) {
+            hrs--;
+            if (hrs == -1)
+              hrs = 11;
+            else if (hrs == 11)
+              hrs = 23;
+            leds[ledMap[(hrs % 12) * 5]] = CRGB::White;
+          }
+        }
+
+
+        LEDS.show();
+        
+        if (!timeSet) {
+          timeSet = true;
+          showTime = true;
+        }
+        else {
+          showTime = showedTime;
+        }
+        timeChanged = true;
+        go = going;
+      }
+
+      // Set AM/PM
+      else if (btn == 15 && pressType == DOWN) {
+        if (type == OFF) {
+          // Set to AM
+          if (hrs > 11)
+            hrs = hrs - 12;
+          animation(ANIM_AM);
+        }
+        else if (type == ON) {
+          // Set to PM
+          if (hrs < 12)
+            hrs = hrs + 12;
+          animation(ANIM_PM);
+        }
+
+        if (!timeSet) {
+          timeSet = true;
+          showTime = true;
+        }
       }
 
       // Store last button registered
@@ -167,9 +253,9 @@ void loop() {
   }
 }
 
+
 boolean ignoreKey() {
   // Ignore if not a hold and equal to last button press within repeat delay
-
   return ((remoteId[0] != msg[4] ||
            remoteId[1] != msg[5] ||
            remoteId[2] != msg[6] ||
@@ -185,10 +271,12 @@ boolean ignoreKey() {
            (millis() - lastButtonTime) < KEYDELAY));
 }
 
+
 void initLEDs(byte brightness) {
   LEDS.setBrightness(brightness);
   LEDS.clear();
 }
+
 
 void intro() {
 #if (!DEBUG)
@@ -196,7 +284,8 @@ void intro() {
 #endif
 }
 
-void incSecs() {
+
+void incTime() {
   secs++;
   if (secs == 60) {
     secs = 0;
@@ -211,20 +300,6 @@ void incSecs() {
   }
 }
 
-void decSecs() {
-  secs--;
-  if (secs == -1) {
-    secs = 59;
-    mins--;
-  }
-  if (mins == -1) {
-    mins = 59;
-    hrs--;
-  }
-  if (hrs == -1) {
-    hrs = 23;
-  }
-}
 
 void saveRemote() {
   uint8_t addr;
@@ -248,6 +323,7 @@ void saveRemote() {
 #endif
 }
 
+
 void loadRemote() {
   uint8_t addr;
 
@@ -270,6 +346,7 @@ void loadRemote() {
 #endif
 }
 
+
 void printMsg(byte *msg, byte len) {
   Serial.print(millis());
   Serial.print(" ");
@@ -279,6 +356,7 @@ void printMsg(byte *msg, byte len) {
   }
   Serial.println();
 }
+
 
 void animation(int type) {
   // Save state
@@ -341,6 +419,41 @@ void animation(int type) {
       LEDS.setBrightness(25-i);
       LEDS.show();
       delay(6);
+    }
+  }
+  else if (type == ANIM_AM) {
+    LEDS.setBrightness(0);
+    for (int i = 15; i < 46; i++) {
+      leds[ledMap[i]] = CRGB::White;
+    }
+    for (int i = 0; i < 21; i++) {
+      LEDS.setBrightness(i);
+      LEDS.show();
+      delay(10);
+    }
+    for (int i = 0; i < 21; i++) {
+      LEDS.setBrightness(20-i);
+      LEDS.show();
+      delay(10);
+    }
+  }
+  else if (type == ANIM_PM) {
+    LEDS.setBrightness(0);
+    for (int i = 0; i < 16; i++) {
+      leds[ledMap[i]] = CRGB::White;
+    }
+    for (int i = 45; i < 60; i++) {
+      leds[ledMap[i]] = CRGB::White;
+    }
+    for (int i = 0; i < 21; i++) {
+      LEDS.setBrightness(i);
+      LEDS.show();
+      delay(10);
+    }
+    for (int i = 0; i < 21; i++) {
+      LEDS.setBrightness(20-i);
+      LEDS.show();
+      delay(10);
     }
   }
 

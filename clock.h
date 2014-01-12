@@ -7,6 +7,18 @@
 #define DATA_PIN 11
 
 
+// Some LED colour constants (GGRRBB)
+#define LED_5  0x101000
+#define LED_15 0x002800
+#define LED_60 0x300000
+
+
+// Button functions
+#define BTN_HRS  12
+#define BTN_MINS 13
+#define BTN_SECS 14
+
+
 /**
  * RF receiver constants
  * Mood:      8 2 F 2
@@ -41,6 +53,8 @@ byte len = 10;
 #define ANIM_RAINBOW 0 // Rotating rainbow, fades in and out - lasts ~5.2s
 #define ANIM_SPIN    1 // Two spinning single LEDs in opposite directions, one half speed - lasts ~3s
 #define ANIM_PULSER  2 // Pulse all LEDs in red - lasts ~0.5s
+#define ANIM_AM      3 // Pulse all LEDs white on lower half of clock - lasts ~0.5s
+#define ANIM_PM      4 // Pulse all LEDs white on upper half of clock - lasts ~0.5s
 
 
 // Standard LED map
@@ -60,6 +74,7 @@ boolean go = false;
 boolean showTime = false;
 boolean timeSet = false;
 boolean animating = false;
+boolean timeChanged = false;
 
 
 uint8_t maxBrightness = 32;
