@@ -68,7 +68,7 @@ ISR(TIMER2_OVF_vect) {
 
   if (!animating || animatingOff) {
     // Add markers every 5 ticks
-    for (int i = 5; i < NUM_LEDS; i+=5) {
+    for (int i = 0; i < NUM_LEDS; i+=5) {
       leds[ledMap[i]] = LED_5;
     }
 
@@ -515,15 +515,15 @@ void animation(int type) {
     for (int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CRGB::Red;
     }
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 32; i++) {
       LEDS.setBrightness(i);
       LEDS.show();
-      delay(6);
+      delay(5);
     }
-    for (int i = 0; i < 26; i++) {
-      LEDS.setBrightness(25-i);
+    for (int i = 0; i < 32; i++) {
+      LEDS.setBrightness(31-i);
       LEDS.show();
-      delay(6);
+      delay(5);
     }
   }
   else if (type == ANIM_AM) {
