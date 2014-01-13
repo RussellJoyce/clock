@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define NUM_LEDS 60
 #define DATA_PIN 11
