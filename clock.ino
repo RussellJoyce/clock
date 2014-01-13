@@ -255,7 +255,14 @@ void loop() {
 
       // Correct time
       else if (btn == BTN_CORRECT && pressType == DOWN) {
+        hrs = random(24);
+        mins = random(60);
+        secs = random(60);
 
+        if (!timeSet) {
+          timeSet = true;
+          showTime = true;
+        }
       }
 
       // Strobing
@@ -601,6 +608,39 @@ void animation(int type) {
     }
 
     randomSeed(micros());
+
+    for (int i = 0; i < 3; i++) {
+      memset(leds, 0, sizeof(leds));
+      showLeds();
+      delay(1000);
+      leds[random(NUM_LEDS)].setHue(random(256));
+      showLeds();
+      delay(100);
+    }
+
+    for (int i = 0; i < 3; i++) {
+      memset(leds, 0, sizeof(leds));
+      showLeds();
+      delay(500);
+      leds[random(NUM_LEDS)].setHue(random(256));
+      showLeds();
+      delay(50);
+    }
+
+    for (int i = 0; i < 50; i++) {
+      memset(leds, 0, sizeof(leds));
+      showLeds();
+      delay(500 - (i * 10));
+      leds[random(NUM_LEDS)].setHue(random(256));
+      showLeds();
+    }
+
+    for (int i = 0; i < 720; i++) {
+      memset(leds, 0, sizeof(leds));
+      leds[random(NUM_LEDS)].setHue(random(256));
+      showLeds();
+    }
+
     for (int i = 0; i < 720; i++) {
       leds[random(NUM_LEDS)].setHue(random(256));
       showLeds();
