@@ -173,7 +173,7 @@ void loop() {
             tickStyle++;
           }
         }
-        displaySettingValue(tickStyle);
+        displaySettingValue(tickStyle, currentBrightness);
       }
 
       // Set clock style
@@ -187,7 +187,7 @@ void loop() {
             clockStyle++;
           }
         }
-        displaySettingValue(clockStyle);
+        displaySettingValue(clockStyle, currentBrightness);
       }
 
       // Set marker brightness
@@ -211,7 +211,7 @@ void loop() {
             markerType++;
           }
         }
-        displaySettingValue(markerType);
+        displaySettingValue(markerType, currentBrightness);
       }
 
       // Rotate clock
@@ -223,14 +223,14 @@ void loop() {
       else if (btn == BTN_POWER && pressType == DOWN) {
         // On first press, just show current value, otherwise increment/decrement
         if (lastButton[2] == BTN_POWER && ((millis() - lastButtonTime) < 2000)) {
-          if (type == OFF && powerMode > 0) {
-            powerMode--;
+          if (type == OFF && power > 0) {
+            power--;
           }
-          else if (type == ON && powerMode < (NUM_PWR - 1)) {
-            powerMode++;
+          else if (type == ON && power < 60) {
+            power++;
           }
         }
-        displaySettingValue(powerMode);
+        displaySettingValue(power, 255);
       }
 
       // Rotate clock
@@ -310,7 +310,7 @@ void loop() {
         }
 
 
-        LEDS.show();
+        showLeds();
         
         if (!timeSet) {
           timeSet = true;
@@ -479,8 +479,7 @@ void animation(int type) {
       for (int j = 0; j < NUM_LEDS; j++) {
         leds[ledMap[j]].setHue((i % 255) + (j * (255 / NUM_LEDS)));
       }
-      LEDS.show();
-      delay(1);
+      showLeds();
       LEDS.setBrightness(i/brightnessScale);
     }
 
@@ -490,16 +489,14 @@ void animation(int type) {
       for (int j = 0; j < NUM_LEDS; j++) {
         leds[ledMap[j]].setHue((i % 255) + (j * (255 / NUM_LEDS)));
       }
-      LEDS.show();
-      delay(2);
+      showLeds();
     }
 
     for (int i = 0; i < 255; i++) {
       for (int j = 0; j < NUM_LEDS; j++) {
         leds[ledMap[j]].setHue((i % 255) + (j * (255 / NUM_LEDS)));
       }
-      LEDS.show();
-      delay(1);
+      showLeds();
       LEDS.setBrightness(brightness-(i/brightnessScale));
     }
   }
@@ -508,7 +505,7 @@ void animation(int type) {
     for (int i = 0; i < NUM_LEDS * 6; i++) {
       leds[ledMap[i % NUM_LEDS]] = CRGB::White;
       leds[ledMap[(NUM_LEDS - 1) - ((i/2) % NUM_LEDS)]] = CRGB::White;
-      LEDS.show();
+      showLeds();
       delay(10);
       leds[ledMap[i % NUM_LEDS]] = CRGB::Black;
       leds[ledMap[(NUM_LEDS - 1) - ((i/2) % NUM_LEDS)]] = CRGB::Black;
@@ -516,18 +513,21 @@ void animation(int type) {
   }
   else if (type == ANIM_PULSER) {
     LEDS.setBrightness(0);
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CRGB::Red;
-    }
     for (int i = 0; i < 32; i++) {
+      for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CRGB::Red;
+      }
       LEDS.setBrightness(i);
-      LEDS.show();
-      delay(5);
+      showLeds();
+      delay(4);
     }
     for (int i = 0; i < 32; i++) {
+      for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CRGB::Red;
+      }
       LEDS.setBrightness(31-i);
-      LEDS.show();
-      delay(5);
+      showLeds();
+      delay(4);
     }
   }
   else if (type == ANIM_AM) {
@@ -537,12 +537,12 @@ void animation(int type) {
     }
     for (int i = 0; i < 21; i++) {
       LEDS.setBrightness(i);
-      LEDS.show();
+      showLeds();
       delay(10);
     }
     for (int i = 0; i < 21; i++) {
       LEDS.setBrightness(20-i);
-      LEDS.show();
+      showLeds();
       delay(10);
     }
   }
@@ -556,12 +556,12 @@ void animation(int type) {
     }
     for (int i = 0; i < 21; i++) {
       LEDS.setBrightness(i);
-      LEDS.show();
+      showLeds();
       delay(10);
     }
     for (int i = 0; i < 21; i++) {
       LEDS.setBrightness(20-i);
-      LEDS.show();
+      showLeds();
       delay(10);
     }
   }
@@ -582,7 +582,7 @@ void turnOff() {
   
   for (int i = currentBrightness; i >= 0; i--) {
     LEDS.setBrightness(i);
-    LEDS.show();
+    showLeds();
     delay(dly);
   }
 
@@ -601,7 +601,7 @@ void turnOn() {
   
   for (int i = 0; i <= currentBrightness; i++) {
     LEDS.setBrightness(i);
-    LEDS.show();
+    showLeds();
     delay(dly);
   }
 
@@ -609,11 +609,12 @@ void turnOn() {
   animatingOff = false;
 }
 
-void displaySettingValue(int value) {
+void displaySettingValue(int value, uint8_t brightness) {
   // Save state
   animating = true;
   boolean showedTime = showTime;
-  uint8_t brightness = LEDS.getBrightness();
+  uint8_t oldBrightness = LEDS.getBrightness();
+  LEDS.setBrightness(brightness);
   //memcpy(ledsBackup, leds, NUM_LEDS * sizeof(CRGB));
 
   // Clear LEDs and stop time display
@@ -625,13 +626,13 @@ void displaySettingValue(int value) {
     leds[ledMap[i]] = CRGB::White;
   }
 
-  LEDS.show();
+  showLeds();
 
   settingChanged = true;
 
   // Restore state
   //memcpy(leds, ledsBackup, NUM_LEDS * sizeof(CRGB));
-  LEDS.setBrightness(brightness);
+  LEDS.setBrightness(oldBrightness);
   showTime = showedTime;
   animating = false;
 }
@@ -721,6 +722,54 @@ void tickAnimation() {
   }
 
   if (showTime && !turnedOff && !settingChanged)
-      LEDS.show();
+    showLeds();
+}
+
+
+void showLeds() {
+  unsigned long maxPower = LED_POWER * (power + 1);
+  unsigned int total = 0;
+  uint8_t maxBrightness =  LEDS.getBrightness();
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    total += min(leds[i].r, maxBrightness);
+    total += min(leds[i].g, maxBrightness);
+    total += min(leds[i].b, maxBrightness);
+  }
+
+  /*
+  Serial.print("Total: ");
+  Serial.println(total);
+  Serial.print("Max: ");
+  Serial.println(maxPower);
+  */
+
+  // Limit power!
+  if (total > maxPower) {
+    unsigned int scale = (maxPower * 100l) / (long)total;
+
+/*
+#if (DEBUG)
+    Serial.print("Power exceeded, scaling by ");
+    Serial.println(scale);
+#endif
+*/
+
+    unsigned int rScale;
+    unsigned int gScale;
+    unsigned int bScale;
+
+    for (int i = 0; i < NUM_LEDS; i++) {
+      rScale = leds[i].r * scale;
+      gScale = leds[i].g * scale;
+      bScale = leds[i].b * scale;
+
+      leds[i].r = rScale / 100;
+      leds[i].g = gScale / 100;
+      leds[i].b = bScale / 100;
+    }
+  }
+
+  LEDS.show();
 }
 

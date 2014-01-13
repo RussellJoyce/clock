@@ -8,9 +8,9 @@
 
 
 // Some LED colour constants (GGRRBB)
-#define LED_5  0x101000
-#define LED_15 0x002800
-#define LED_60 0x300000
+#define LED_5  0x181800
+#define LED_15 0x003000
+#define LED_60 0x380000
 
 
 // Button functions
@@ -22,9 +22,9 @@
 #define BTN_MBRIGHT 4
 #define BTN_MCOLOUR 5
 #define BTN_MTYPE   6
-//#define BTN_      7
+#define BTN_ROTATE  7
 
-#define BTN_ROTATE  8
+//#define BTN_      8
 //#define BTN_      9
 #define BTN_POWER   10
 #define BTN_CRAZY   11
@@ -120,9 +120,8 @@ int hrsDisp = 0;
 #define MRKR_60ONLY   3
 #define MRKR_NONE     4
 
-#define NUM_PWR       2
-#define PWR_STANDARD  0
-#define PWR_HIGH      1
+
+#define LED_POWER     768
 
 
 int handBrightness;
@@ -133,7 +132,7 @@ int markerBrightness;
 int markerColours;
 int markerType = MRKR_EVERY5;
 int clockAngle = 0;
-int powerMode = PWR_STANDARD;
+int power = 7;
 
 
 CRGB secColour = CRGB::Blue;
@@ -155,6 +154,7 @@ boolean timeChanged = false;
 boolean settingChanged = false;
 boolean turnedOff = false;
 
+#define BRIGHTNESS 255
 
-uint8_t maxBrightness = 50;
-uint8_t currentBrightness = 50;
+uint8_t maxBrightness = BRIGHTNESS;
+uint8_t currentBrightness = BRIGHTNESS;
