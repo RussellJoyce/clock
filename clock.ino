@@ -72,6 +72,7 @@ ISR(TIMER2_OVF_vect) {
       leds[ledMap[i]] = LED_5;
     }
 
+    clockTransform();
     tickAnimation();
 
     if (settingChanged)
@@ -475,7 +476,9 @@ void animation(int type) {
     LEDS.setBrightness(0);
   
     for (int i = 0; i < 255; i++) {
-      fill_rainbow(leds, NUM_LEDS, i % 255, 255/NUM_LEDS);
+      for (int j = 0; j < NUM_LEDS; j++) {
+        leds[ledMap[j]].setHue((i % 255) + (j * (255 / NUM_LEDS)));
+      }
       LEDS.show();
       delay(1);
       LEDS.setBrightness(i/brightnessScale);
@@ -484,20 +487,25 @@ void animation(int type) {
     LEDS.setBrightness(brightness);
 
     for (int i = 0; i < ((255 * 2) - 1); i++) {
-      fill_rainbow(leds, NUM_LEDS, i % 255, 255/NUM_LEDS);
+      for (int j = 0; j < NUM_LEDS; j++) {
+        leds[ledMap[j]].setHue((i % 255) + (j * (255 / NUM_LEDS)));
+      }
       LEDS.show();
       delay(2);
     }
 
     for (int i = 0; i < 255; i++) {
-      fill_rainbow(leds, NUM_LEDS, i % 255, 255/NUM_LEDS);
+      for (int j = 0; j < NUM_LEDS; j++) {
+        leds[ledMap[j]].setHue((i % 255) + (j * (255 / NUM_LEDS)));
+      }
       LEDS.show();
       delay(1);
       LEDS.setBrightness(brightness-(i/brightnessScale));
     }
   }
   else if (type == ANIM_SPIN) {
-    for (int i = 0; i < NUM_LEDS * 4; i++) {
+    LEDS.setBrightness(maxBrightness);
+    for (int i = 0; i < NUM_LEDS * 6; i++) {
       leds[ledMap[i % NUM_LEDS]] = CRGB::White;
       leds[ledMap[(NUM_LEDS - 1) - ((i/2) % NUM_LEDS)]] = CRGB::White;
       LEDS.show();
@@ -628,12 +636,59 @@ void displaySettingValue(int value) {
   animating = false;
 }
 
+
+void clockTransform() {
+  // Basic clock
+  if (clockStyle == CLK_STANDARD) {
+    secsDisp = secs;
+    minsDisp = mins;
+    hrsDisp = ((hrs % 12) * 5) + (mins / 12);
+  }
+
+  // 24 hour clock
+  else if (clockStyle == CLK_24HR) {
+    secsDisp = secs;
+    minsDisp = mins;
+    hrsDisp = (hrs * 2.5) + (mins / 24);
+  }
+
+  // Audsley clock (backwards)
+  else if (clockStyle == CLK_AUDSLEY) {
+    secsDisp = (60 - secs) % 60;
+    minsDisp = (60 - mins) % 60;
+    hrsDisp = (60 - ((hrs % 12) * 5) + (mins / 12)) % 60;
+  }
+
+  // Moving clock face
+  else if (clockStyle == CLK_MOVEFACE) {
+    secsDisp = 0;
+    minsDisp = (mins + secs) % 60;
+    hrsDisp = (((hrs % 12) * 5) + (mins / 12) + secs) % 60;
+  }
+
+  // Binary clock 1 (hrs, mins, secs)
+  else if (clockStyle == CLK_BINARY1) {
+    
+  }
+
+  // Binary clock 2 (secs since midnight)
+  else if (clockStyle == CLK_BINARY2) {
+    
+  }
+
+  // Binary clock 3 (millis)
+  else if (clockStyle == CLK_BINARY3) {
+    
+  }
+}
+
+
 void tickAnimation() {
   // Basic ticking
   if (tickStyle == TICK_STANDARD) {
-    leds[ledMap[secs]] += secColour;
-    leds[ledMap[mins]] += minColour;
-    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] += hrColour;
+    leds[ledMap[secsDisp]] += secColour;
+    leds[ledMap[minsDisp]] += minColour;
+    leds[ledMap[hrsDisp]] += hrColour;
   }
 
   // Smooth fading tick
@@ -654,15 +709,15 @@ void tickAnimation() {
   // Fill up to current seconds
   else if (tickStyle == TICK_FILL) {
     if (mins % 2 == 1) {
-      for (int i = secs; i < NUM_LEDS; i++)
+      for (int i = secsDisp; i < NUM_LEDS; i++)
         leds[ledMap[i]] += secColour;
     }
     else {
-      for (int i = 0; i <= secs; i++)
+      for (int i = 0; i <= secsDisp; i++)
         leds[ledMap[i]] += secColour;
     }
-    leds[ledMap[mins]] = minColour;
-    leds[ledMap[((hrs % 12) * 5) + (mins / 12)]] = hrColour;
+    leds[ledMap[minsDisp]] = minColour;
+    leds[ledMap[hrsDisp]] = hrColour;
   }
 
   if (showTime && !turnedOff && !settingChanged)

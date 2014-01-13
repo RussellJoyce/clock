@@ -80,15 +80,19 @@ byte len = 10;
 // Backwards LED map
 //uint8_t ledMap[] = {59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 // Upside-down LED map
-uint8_t ledMap[] = {29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30};
+//uint8_t ledMap[] = {29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30};
 // Clock map
-
+uint8_t ledMap[] = {48, 28, 9, 49, 29, 10, 50, 30, 11, 51, 31, 12, 52, 32, 13, 53, 33, 14, 54, 34, 15, 55, 35, 16, 56, 36, 17, 57, 37, 18, 58, 38, 19, 59, 39, 0, 40, 20, 1, 41, 21, 2, 42, 22, 3, 43, 23, 4, 44, 24, 5, 45, 25, 6, 46, 26, 7, 47, 27, 8};
 
 CRGB leds[NUM_LEDS];
 //CRGB ledsBackup[NUM_LEDS];
 int secs = 0;
 int mins = 0;
 int hrs = 0;
+
+int secsDisp = 0;
+int minsDisp = 0;
+int hrsDisp = 0;
 
 
 // User settings
@@ -100,11 +104,14 @@ int hrs = 0;
 #define TICK_SPIN     3
 #define TICK_FILL     4
 
-#define NUM_CLK       4
+#define NUM_CLK       7
 #define CLK_STANDARD  0
 #define CLK_24HR      1
 #define CLK_AUDSLEY   2
 #define CLK_MOVEFACE  3
+#define CLK_BINARY1   4
+#define CLK_BINARY2   5
+#define CLK_BINARY3   6
 
 #define NUM_MRKR      5
 #define MRKR_EVERY5   0
@@ -149,5 +156,5 @@ boolean settingChanged = false;
 boolean turnedOff = false;
 
 
-uint8_t maxBrightness = 32;
-uint8_t currentBrightness = 32;
+uint8_t maxBrightness = 50;
+uint8_t currentBrightness = 50;
