@@ -67,9 +67,29 @@ ISR(TIMER2_OVF_vect) {
   incTime();
 
   if (!animating || animatingOff) {
-    // Add markers every 5 ticks
-    for (int i = 0; i < NUM_LEDS; i+=5) {
-      leds[ledMap[i]] = LED_5;
+
+    // Add markers
+    if (markerType == MRKR_EVERY5) {
+      for (int i = 0; i < NUM_LEDS; i+=5) {
+        leds[ledMap[i]] = LED_5;
+      }
+      leds[ledMap[0]]  = LED_60;
+      leds[ledMap[15]] = LED_15;
+      leds[ledMap[30]] = LED_15;
+      leds[ledMap[45]] = LED_15;
+    }
+    else if (markerType == MRKR_EVERY15) {
+      leds[ledMap[0]]  = LED_60;
+      leds[ledMap[15]] = LED_15;
+      leds[ledMap[30]] = LED_15;
+      leds[ledMap[45]] = LED_15;
+    }
+    else if (markerType == MRKR_EVERY30) {
+      leds[ledMap[0]]  = LED_60;
+      leds[ledMap[30]] = LED_15;
+    }
+    else if (markerType == MRKR_60ONLY) {
+      leds[ledMap[0]]  = LED_60;
     }
 
     clockTransform();
@@ -233,13 +253,18 @@ void loop() {
         displaySettingValue(power, 255);
       }
 
-      // Rotate clock
-      else if (btn == BTN_ROTATE && pressType == DOWN) {
+      // Correct time
+      else if (btn == BTN_CORRECT && pressType == DOWN) {
 
       }
 
-      // Go crazy
-      else if (btn == BTN_CRAZY && pressType == DOWN) {
+      // Strobing
+      else if (btn == BTN_STROBE && pressType == DOWN) {
+        animation(ANIM_STROBE);
+      }
+
+      // Pretty rainbow
+      else if (btn == BTN_RAINBOW && pressType == DOWN) {
         animation(ANIM_RAINBOW);
       }
 
@@ -255,12 +280,12 @@ void loop() {
 
         // Add markers every 5 ticks
         for (int i = 5; i < NUM_LEDS; i+=5) {
-          leds[ledMap[i]] = LED_5;
+          leds[ledMap[i]] = LED_SET5;
         }
-        leds[ledMap[0]]  = LED_60;
-        leds[ledMap[15]] = LED_15;
-        leds[ledMap[30]] = LED_15;
-        leds[ledMap[45]] = LED_15;
+        leds[ledMap[0]]  = LED_SET60;
+        leds[ledMap[15]] = LED_SET15;
+        leds[ledMap[30]] = LED_SET15;
+        leds[ledMap[45]] = LED_SET15;
 
         
         // Increment/decrement value and display on clock
@@ -566,6 +591,31 @@ void animation(int type) {
     }
   }
 
+  else if (type == ANIM_STROBE) {
+    memset(leds, 0xFF, sizeof(leds));
+    for (int i = 0; i < 30; i++) {
+      showLeds();
+      delay(20);
+      LEDS.showColor(CRGB::Black);
+      delay(80);
+    }
+
+    randomSeed(micros());
+    for (int i = 0; i < 720; i++) {
+      leds[random(NUM_LEDS)].setHue(random(256));
+      showLeds();
+    }
+
+    for (int i = 0; i < 30; i++) {
+      showLeds();
+      delay(20);
+      LEDS.showColor(CRGB::Black);
+      delay(80);
+    }
+
+    delay(3000);
+  }
+
   // Restore state
   //memcpy(leds, ledsBackup, NUM_LEDS * sizeof(CRGB));
   LEDS.setBrightness(brightness);
@@ -667,18 +717,8 @@ void clockTransform() {
     hrsDisp = (((hrs % 12) * 5) + (mins / 12) + secs) % 60;
   }
 
-  // Binary clock 1 (hrs, mins, secs)
-  else if (clockStyle == CLK_BINARY1) {
-    
-  }
-
-  // Binary clock 2 (secs since midnight)
-  else if (clockStyle == CLK_BINARY2) {
-    
-  }
-
-  // Binary clock 3 (millis)
-  else if (clockStyle == CLK_BINARY3) {
+  // NO CLOCK
+  else if (clockStyle == CLK_PAUSE) {
     
   }
 }
@@ -695,14 +735,29 @@ void tickAnimation() {
       showLeds();
   }
 
-  // Smooth fading tick
-  else if (tickStyle == TICK_SMOOTH) {
+  // RESERVED
+  else if (tickStyle == TICK_RESERVED) {
 
   }
 
   // Pulse each tick
   else if (tickStyle == TICK_PULSE) {
-    
+    for (int i = 0; i < currentBrightness; i+=4) {
+      memset(leds, 0, sizeof(leds));
+      leds[ledMap[secsDisp]] = CRGB(0, 0, i);
+      leds[ledMap[minsDisp]] += minColour;
+      leds[ledMap[hrsDisp]] += hrColour;
+      if (showTime && !turnedOff && !settingChanged)
+        showLeds();
+    }
+    for (int i = currentBrightness; i >= 0; i-=4) {
+      memset(leds, 0, sizeof(leds));
+      leds[ledMap[secsDisp]] = CRGB(0, 0, i);
+      leds[ledMap[minsDisp]] += minColour;
+      leds[ledMap[hrsDisp]] += hrColour;
+      if (showTime && !turnedOff && !settingChanged)
+        showLeds();
+    }
   }
 
   // Spin after each tick
@@ -748,23 +803,9 @@ void showLeds() {
     total += min(leds[i].b, maxBrightness);
   }
 
-  /*
-  Serial.print("Total: ");
-  Serial.println(total);
-  Serial.print("Max: ");
-  Serial.println(maxPower);
-  */
-
   // Limit power!
   if (total > maxPower) {
     unsigned int scale = (maxPower * 100l) / (long)total;
-
-/*
-#if (DEBUG)
-    Serial.print("Power exceeded, scaling by ");
-    Serial.println(scale);
-#endif
-*/
 
     unsigned int rScale;
     unsigned int gScale;

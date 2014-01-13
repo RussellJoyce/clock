@@ -8,9 +8,13 @@
 
 
 // Some LED colour constants (GGRRBB)
-#define LED_5  0x181800
-#define LED_15 0x003000
-#define LED_60 0x380000
+#define LED_SET5  0x151500
+#define LED_SET15 0x002B00
+#define LED_SET60 0x350000
+
+#define LED_5  0x151500
+#define LED_15 0x151508
+#define LED_60 0x151510
 
 
 // Button functions
@@ -24,10 +28,10 @@
 #define BTN_MTYPE   6
 #define BTN_ROTATE  7
 
-//#define BTN_      8
-//#define BTN_      9
-#define BTN_POWER   10
-#define BTN_CRAZY   11
+#define BTN_POWER   8
+#define BTN_CORRECT 9
+#define BTN_STROBE  10
+#define BTN_RAINBOW 11
 
 #define BTN_HRS     12
 #define BTN_MINS    13
@@ -73,6 +77,7 @@ byte len = 10;
 #define ANIM_PULSER  2 // Pulse all LEDs in red - lasts ~0.5s
 #define ANIM_AM      3 // Pulse all LEDs white on lower half of clock - lasts ~0.5s
 #define ANIM_PM      4 // Pulse all LEDs white on upper half of clock - lasts ~0.5s
+#define ANIM_STROBE  5 // Do not use
 
 
 // Standard LED map
@@ -99,19 +104,17 @@ int hrsDisp = 0;
 
 #define NUM_TICK      5
 #define TICK_STANDARD 0
-#define TICK_SMOOTH   1
+#define TICK_RESERVED 1
 #define TICK_PULSE    2
 #define TICK_SPIN     3
 #define TICK_FILL     4
 
-#define NUM_CLK       7
+#define NUM_CLK       5
 #define CLK_STANDARD  0
 #define CLK_24HR      1
 #define CLK_AUDSLEY   2
 #define CLK_MOVEFACE  3
-#define CLK_BINARY1   4
-#define CLK_BINARY2   5
-#define CLK_BINARY3   6
+#define CLK_PAUSE     4
 
 #define NUM_MRKR      5
 #define MRKR_EVERY5   0
