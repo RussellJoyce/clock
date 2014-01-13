@@ -657,7 +657,7 @@ void clockTransform() {
   else if (clockStyle == CLK_AUDSLEY) {
     secsDisp = (60 - secs) % 60;
     minsDisp = (60 - mins) % 60;
-    hrsDisp = (60 - ((hrs % 12) * 5) + (mins / 12)) % 60;
+    hrsDisp = (60 - (((hrs % 12) * 5) + (mins / 12))) % 60;
   }
 
   // Moving clock face
@@ -690,6 +690,9 @@ void tickAnimation() {
     leds[ledMap[secsDisp]] += secColour;
     leds[ledMap[minsDisp]] += minColour;
     leds[ledMap[hrsDisp]] += hrColour;
+
+    if (showTime && !turnedOff && !settingChanged)
+      showLeds();
   }
 
   // Smooth fading tick
@@ -704,7 +707,15 @@ void tickAnimation() {
 
   // Spin after each tick
   else if (tickStyle == TICK_SPIN) {
-    
+    for (int i = 0; i <= NUM_LEDS; i++) {
+      memset(leds, 0, sizeof(leds));
+      leds[ledMap[minsDisp]] += minColour;
+      leds[ledMap[hrsDisp]] += hrColour;
+      leds[ledMap[(secsDisp + i) % NUM_LEDS]] += secColour;
+      
+      if (showTime && !turnedOff && !settingChanged)
+        showLeds();
+    }
   }
 
   // Fill up to current seconds
@@ -719,10 +730,10 @@ void tickAnimation() {
     }
     leds[ledMap[minsDisp]] = minColour;
     leds[ledMap[hrsDisp]] = hrColour;
-  }
 
-  if (showTime && !turnedOff && !settingChanged)
-    showLeds();
+    if (showTime && !turnedOff && !settingChanged)
+      showLeds();
+  }
 }
 
 
